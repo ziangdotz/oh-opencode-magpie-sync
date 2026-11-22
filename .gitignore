@@ -1,0 +1,44 @@
+# Dependencies, builds and local runs
+node_modules/
+dist/
+coverage/
+.npm-cache/
+.host/
+*.log
+*.tgz
+*.tsbuildinfo
+
+# Environment and local credentials (keep sanitized templates)
+.env
+.env.*
+!.env.example
+!.env.sample
+.npmrc
+.netrc
+.aws/
+.ssh/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# OpenCode user/project configuration and backups
+.opencode/
+opencode.json
+opencode.jsonc
+opencode.local.*
+opencode.json.*
+opencode.jsonc.*
+auth.json
+credentials.json
+service.json
+*.bak
+*.backup
+
+# Local editor and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

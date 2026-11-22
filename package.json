@@ -1,0 +1,42 @@
+{
+  "name": "opencode-magpie-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "check:package": "npm run build && node tools/check-package.mjs",
+    "test:host": "npm run build && node tools/host-smoke.mjs",
+    "test:host:inference": "npm run build && node tools/host-smoke.mjs --inference",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26"
+  },
+  "files": [
+    "dist",
+    "src",
+    "docs",
+    "opencode.example.jsonc",
+    "README.md",
+    "README.en.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "LICENSE",
+    "tools",
+    "CHANGELOG.md"
+  ]
+}

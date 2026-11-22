@@ -1,0 +1,36 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { join } from 'node:path';
+const config=JSON.parse(await readFile(join(process.env.USERPROFILE,'.config/opencode/opencode.json'),'utf8'));
+const entry=config.plugins.find(p=>p.package?.includes('oh-opencode-magpie-sync'));
+const key=entry.options.gatewayKey;
+if(!key) throw new Error('Gateway key missing');
+const redact=s=>s.split(key).join('[REDACTED]');
+const response=await fetch(entry.options.baseURL.replace(/\/+$/,'')+'/models',{headers:{Authorization:`Bearer ${key}`},redirect:'error',signal:AbortSignal.timeout(10000)});
+if(!response.ok) throw new Error(`Catalog HTTP ${response.status}`);
+const catalog=await response.json();
+const exe=process.env.OPENCODE_BIN ?? 'opencode';
+async function run(args) {
+  const child=spawn(exe,args,{windowsHide:true});
+  child.stdin.end();
+  let output='';
+  child.stdout.on('data',d=>output+=d);child.stderr.on('data',d=>output+=d);
+  const timer=setTimeout(()=>child.kill(),90000);
+  const code=await new Promise((resolve,reject)=>{child.on('exit',resolve);child.on('error',reject)});
+  clearTimeout(timer);
+  return {code,output:redact(output)};
+}
+const listed=await run(['models']);
+const ids=listed.output.split(/\r?\n/).filter(s=>s.startsWith('magpie/')).map(s=>s.slice(7));
+const remote=catalog.data.map(m=>m.id);
+const missing=remote.filter(id=>!ids.includes(id));
+const extra=ids.filter(id=>!remote.includes(id));
+console.log(JSON.stringify({remoteCount:remote.length,openCodeCount:ids.length,missing,extra}));
+if(missing.length || extra.length || listed.code!==0) throw new Error('Catalog mismatch');
+const model=process.argv[2] ?? 'trae-cn/Doubao-Seed-2.1-Turbo';
+if(!remote.includes(model)) throw new Error('Requested test model not in live catalog');
+const inference=await run(['run','--model',`magpie/${model}`,'Reply with exactly MAGPIE_SYNC_OK. Do not use tools or inspect any files.']);
+console.log(inference.output);
+const result={date:new Date().toISOString(),remoteCount:remote.length,openCodeCount:ids.length,missing,extra,model,exitCode:inference.code,replyMatched:inference.output.includes('MAGPIE_SYNC_OK')};
+await writeFile('docs/live-validation.json',JSON.stringify(result,null,2)+'\n');
+if(inference.code!==0 || !result.replyMatched) throw new Error('Live completion failed');
