@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import type { Plugin } from "@opencode/plugin";
 import plugin from "../src/index.js";
+import { readOptions } from "../src/server/plugin.js";
 
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
@@ -20,6 +21,7 @@ it("discovers over HTTP, authenticates inference and disposes", async () => {
   vi.stubEnv("MAGPIE_GATEWAY_KEY", "environment-fallback-not-selected");
   let transform: Parameters<Plugin.Context["provider"]["transform"]>[0] | undefined;
   let hook: Parameters<Plugin.Context["session"]["hook"]>[1] | undefined;
+  let hookOptions: unknown;
   const dispose = vi.fn(async () => {});
   const snapshots: unknown[] = [];
   const reload = vi.fn(async () => {
@@ -27,12 +29,16 @@ it("discovers over HTTP, authenticates inference and disposes", async () => {
   });
   const ctx = { options: { baseURL, refreshSeconds: 10, gatewayKey: "test-secret" }, provider: {
     transform: async (fn: typeof transform) => { transform = fn; return { dispose }; }, reload,
-  }, session: { hook: async (_: string, fn: typeof hook) => { hook = fn; return { dispose }; } } };
+  }, session: { hook: async (_: string, fn: typeof hook, opts?: unknown) => { hook = fn; hookOptions = opts; return { dispose }; } } };
   let cleanup: (() => Promise<void>) | undefined;
   try {
     cleanup = await plugin.setup(ctx as unknown as Plugin.Context) as typeof cleanup;
     expect(discoveryAuth).toBe("Bearer test-secret");
+    expect(hookOptions).toEqual({ providerID: "magpie" });
     expect(JSON.stringify(snapshots)).toContain('"modelID":"remote-magpie/cursor/x"');
+    expect(() =>
+      transform?.({ get: () => ({}), add: () => {} } as never),
+    ).toThrow("Magpie provider collision");
     const event = { model: { providerID: "magpie" }, request: new Request(baseURL + "/chat/completions", { method: "POST", body: JSON.stringify({ model: "remote-magpie/cursor/x" }) }) };
     type HttpEvent = typeof event;
     await (hook as unknown as (input: HttpEvent) => void)(event);
@@ -58,7 +64,7 @@ it("polls without overlap, ignores order, retains on errors, confirms empties an
   vi.stubGlobal("fetch", fetcher);
   const reload = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
-  const ctx = {options:{}, provider:{transform:async () => ({dispose}),reload}, session:{hook:async () => ({dispose})}};
+  const ctx = {options:{baseURL:"http://127.0.0.1/v1"}, provider:{transform:async () => ({dispose}),reload}, session:{hook:async () => ({dispose})}};
   const cleanup = await plugin.setup(ctx as unknown as Plugin.Context) as () => Promise<void>;
   const poll = () => vi.advanceTimersByTimeAsync(30000);
   try {
@@ -76,6 +82,7 @@ it("polls without overlap, ignores order, retains on errors, confirms empties an
     reload.mockRejectedValueOnce(new Error("secret-value"));
     payload={data:[{id:"after-reload-failure"}]};
     await poll(); expect(reload).toHaveBeenCalledTimes(4);
+    expect(warn.mock.calls.flat().join()).toContain("Magpie registry reload failed");
     await poll(); expect(reload).toHaveBeenCalledTimes(5);
     release=()=>{};
     const before=fetcher.mock.calls.length;
@@ -83,4 +90,62 @@ it("polls without overlap, ignores order, retains on errors, confirms empties an
     release?.(); release=undefined; await vi.advanceTimersByTimeAsync(0);
   } finally { await cleanup(); warn.mockRestore(); }
   const calls=fetcher.mock.calls.length; await poll(); expect(fetcher.mock.calls.length).toBe(calls);
+});
+
+it("reports a safe missing-key diagnostic without contacting the gateway", async () => {
+  vi.stubEnv("MAGPIE_GATEWAY_KEY", "");
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const fetcher = vi.fn();
+  vi.stubGlobal("fetch", fetcher);
+  const dispose = vi.fn(async () => {});
+  const ctx = {
+    options: { baseURL: "http://127.0.0.1/v1" },
+    provider: { transform: async () => ({ dispose }), reload: vi.fn(async () => {}) },
+    session: { hook: async () => ({ dispose }) },
+  };
+  let cleanup: (() => Promise<void>) | undefined;
+  try {
+    cleanup = await plugin.setup(ctx as unknown as Plugin.Context) as typeof cleanup;
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(warn.mock.calls.flat().join()).toContain("MAGPIE_GATEWAY_KEY missing");
+  } finally {
+    await cleanup?.();
+    warn.mockRestore();
+  }
+});
+
+it("normalises options, clamps ranges and warns about unknown keys", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  try {
+    const config = readOptions({
+      baseURL: "  https://example.test/proxy/v1/  ",
+      gatewayKey: "  secret  ",
+      refreshSeconds: 1,
+      timeoutMs: 99_999,
+      typo: true,
+    });
+    expect(config).toEqual({
+      baseURL: "https://example.test/proxy/v1",
+      gatewayKey: "secret",
+      refreshSeconds: 10,
+      timeoutMs: 30_000,
+    });
+    expect(warn).toHaveBeenCalledWith('[magpie.sync] Ignoring unknown option "typo"');
+  } finally {
+    warn.mockRestore();
+  }
+});
+
+it("rejects unsafe or missing gateway URLs before registering a provider", async () => {
+  await expect(
+    plugin.setup({ options: {} } as unknown as Plugin.Context),
+  ).rejects.toThrow("baseURL is required");
+  await expect(
+    plugin.setup({ options: { baseURL: "ftp://example.test/v1" } } as unknown as Plugin.Context),
+  ).rejects.toThrow("http or https");
+  await expect(
+    plugin.setup({
+      options: { baseURL: "https://alice:secret@example.test/v1" },
+    } as unknown as Plugin.Context),
+  ).rejects.toThrow("must not contain credentials");
 });

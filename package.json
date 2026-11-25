@@ -2,13 +2,31 @@
   "name": "opencode-magpie-sync",
   "version": "0.1.0",
   "private": true,
+  "description": "OpenCode server plugin that discovers a remote Magpie catalog and registers it as a native model provider.",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ziangdotz/oh-opencode-magpie-sync.git"
+  },
+  "homepage": "https://github.com/ziangdotz/oh-opencode-magpie-sync#readme",
+  "bugs": {
+    "url": "https://github.com/ziangdotz/oh-opencode-magpie-sync/issues"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "magpie",
+    "model-catalog",
+    "openai-compatible"
+  ],
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest run",
+    "verify": "npm run check && npm test && npm run check:package",
     "build": "tsc -p tsconfig.build.json",
     "check:package": "npm run build && node tools/check-package.mjs",
     "test:host": "npm run build && node tools/host-smoke.mjs",
@@ -16,7 +34,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@opencode/plugin": "2.3.2"
+    "@opencode/plugin": "2.4.1"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

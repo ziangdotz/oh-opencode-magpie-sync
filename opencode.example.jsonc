@@ -2,11 +2,23 @@
   "$schema": "https://opencode.ai/config.json",
   "plugins": [
     {
+      // Absolute path to this package. The host loads dist/index.js.
+      // Windows file URLs use forward slashes: file:///C:/path/to/opencode-magpie-sync
       "package": "file:///C:/Users/YOUR_NAME/dev/opencode-magpie-sync",
       "options": {
-        "baseURL": "http://192.168.22.100:3425/v1",
+        // Required. Magpie gateway base URL, usually including /v1.
+        // Proxy prefixes are preserved. Use an RFC 5737 address or your own host.
+        "baseURL": "http://192.0.2.10:3425/v1",
+
+        // Plaintext Gateway Key. Prefer the server process environment variable
+        // MAGPIE_GATEWAY_KEY in production; a non-empty value here wins.
         "gatewayKey": "REPLACE_WITH_MAGPIE_GATEWAY_KEY",
+
+        // Catalog polling interval in seconds, clamped to 10-3600.
         "refreshSeconds": 30,
+
+        // Per-discovery timeout in milliseconds, clamped to 1000-30000.
+        // This does not control inference timeouts.
         "timeoutMs": 5000
       }
     }
