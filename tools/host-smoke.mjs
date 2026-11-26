@@ -3,7 +3,9 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-const root = resolve('.host/smoke');
+const root = resolve(process.env.OPENCODE_TEST_ROOT ?? '.host/smoke');
+const packageRoot = resolve(process.env.OPENCODE_TEST_PACKAGE ?? '.');
+const isolatedEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(OPENCODE_|MAGPIE_|XDG_)/i.test(key)));
 await mkdir(root, {recursive:true});
 const allowInference = process.argv.includes('--inference');
 let requests=0;
@@ -28,10 +30,10 @@ const server=createServer(async (req,res)=>{
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const config=resolve(root,'opencode.json');
-await writeFile(config,JSON.stringify({plugins:[{package:pathToFileURL(resolve('.')).href,options:{baseURL:`http://127.0.0.1:${server.address().port}/v1`}}]}));
+await writeFile(config,JSON.stringify({plugins:[{package:pathToFileURL(packageRoot).href,options:{baseURL:`http://127.0.0.1:${server.address().port}/v1`}}]}));
 try {
   async function run(args) {
-  const child=spawn(process.env.OPENCODE_BIN ?? 'opencode', args, {cwd:root,env:{...process.env,OPENCODE_CONFIG:config,XDG_CONFIG_HOME:resolve(root,'config'),XDG_DATA_HOME:resolve(root,'data'),XDG_CACHE_HOME:resolve(root,'cache'),OPENCODE_CONFIG_CONTENT:JSON.stringify({}),MAGPIE_GATEWAY_KEY:'mock-only-key'},windowsHide:true});
+  const child=spawn(process.env.OPENCODE_BIN ?? 'opencode', args, {cwd:root,env:{...isolatedEnv,OPENCODE_CONFIG:config,OPENCODE_CONFIG_DIR:resolve(root,'config/opencode'),XDG_STATE_HOME:resolve(root,'state'),XDG_CONFIG_HOME:resolve(root,'config'),XDG_DATA_HOME:resolve(root,'data'),XDG_CACHE_HOME:resolve(root,'cache'),OPENCODE_CONFIG_CONTENT:JSON.stringify({}),MAGPIE_GATEWAY_KEY:'mock-only-key'},windowsHide:true});
   child.stdin.end();
   let output='';
   child.stdout.on('data',d=>output+=d); child.stderr.on('data',d=>output+=d);

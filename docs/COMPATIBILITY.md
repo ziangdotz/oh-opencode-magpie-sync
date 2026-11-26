@@ -6,9 +6,9 @@
 
 | 项目 | 值 |
 | --- | --- |
-| 目标宿主 | OpenCode **2.4.1** |
-| 构建/类型 SDK | `@opencode/plugin` **2.4.1**（精确版本） |
-| 传递 SDK | `@opencode/ai`、`@opencode/schema`、`@opencode/client`、`@opencode/protocol`、`@opencode/util` 均为 2.4.1 |
+| 目标宿主 | OpenCode **2.4.2** |
+| 构建/类型 SDK | `@opencode/plugin` **2.4.2**（精确版本） |
+| 传递 SDK | `@opencode/ai`、`@opencode/schema`、`@opencode/client`、`@opencode/protocol`、`@opencode/util` 均为 2.4.2 |
 | Node.js | `^22.12.0 || ^24.0.0 || >=26`；实测 24.22.1 |
 | 插件版本 | v0.1.0 |
 | 包形态 | 私有包，通过本地目录加载，未发布 npm |
@@ -19,8 +19,9 @@ SDK 在 `package.json` 中**不带** `^` 或 `~`；`package-lock.json` 固定完
 
 | 宿主版本 | 状态 | 说明 |
 | --- | --- | --- |
-| OpenCode 2.4.1 | **已验证适配** | 类型、18 项测试、包入口、真实宿主 + 模拟目录通过；零推理请求 |
-| OpenCode 2.4.0 | 曾验证 | 上一轮适配基线；API 与本版几乎一致（2.4.1 增加 `automation` 域） |
+| OpenCode 2.4.2 | **已验证适配** | 类型、18 项测试、包入口、真实宿主 + 模拟目录通过；零推理请求 |
+| OpenCode 2.4.1 | 历史验证 | 2026-11-24/25 无生成检查通过；本轮未重复运行 |
+| OpenCode 2.4.0 | 曾验证 | 历史适配基线；2.4.1 增加 `automation` 域，本轮未重复运行 |
 | OpenCode 2.3.2 | 历史验证 | 曾有真实 Linux Magpie 96 模型与一次文本生成记录；不作为 2.4.x 依据 |
 | 其他 2.x / 3.x | **未承诺** | 需按第 4 节重新适配与验收 |
 
@@ -121,6 +122,6 @@ npm run test:host
 ## 7. 版本与发布策略
 
 - 插件版本严格固定为 **v0.1.0**，与宿主版本独立。
-- 本次 OpenCode 2.4.1 适配**不改变插件版本**；相关改动记录在 [CHANGELOG](../CHANGELOG.md) 的“未发布”小节。
+- 本次 OpenCode 2.4.2 适配**不改变插件版本**；相关改动记录在 [CHANGELOG](../CHANGELOG.md) 的“未发布”小节。
 - 任何版本变更必须由维护者明确授权；未经授权不得提升 patch、minor 或 major。
 - 不承诺跨 minor 的 API 兼容；升级宿主视为一次受控变更。

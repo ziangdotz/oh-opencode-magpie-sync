@@ -7,8 +7,8 @@
 | 项目 | 值 |
 | --- | --- |
 | 插件 | v0.1.0 |
-| 宿主 | OpenCode 2.4.1 |
-| SDK | 2.4.1 |
+| 宿主 | OpenCode 2.4.2 |
+| SDK | 2.4.2 |
 | 运行形态 | OpenCode 服务端插件（后台服务或 `--standalone`） |
 | 目录来源 | 远端 Magpie `<baseURL>/models` |
 | 目录持久化 | 无（仅内存） |

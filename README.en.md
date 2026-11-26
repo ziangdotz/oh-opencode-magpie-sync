@@ -1,6 +1,6 @@
 # opencode-magpie-sync
 
-**OpenCode 2.4.1** · plugin **v0.1.0** · MIT · server-side plugin only
+**OpenCode 2.4.2** · plugin **v0.1.0** · MIT · server-side plugin only
 
 Synchronises a remote Magpie gateway's `/v1/models` catalog into OpenCode as a native model provider. Once installed, Magpie models appear directly in the `/models` picker, so every workstation no longer needs a hand-maintained list of model IDs.
 
@@ -29,7 +29,7 @@ Typical deployment: OpenCode on Windows reaches Magpie on Linux over a private n
 
 | Item | Requirement |
 | --- | --- |
-| OpenCode | **2.4.1** (this revision is adapted to that host; re-validate after upgrading) |
+| OpenCode | **2.4.2** (this revision is adapted to that host; re-validate after upgrading) |
 | Node.js | `^22.12.0`, `^24.0.0` or `>=26` for build/test; validated on 24.22.1 |
 | Network | The OpenCode server process can reach the gateway host and port |
 | Credentials | A Magpie Gateway Key allowed to read the catalog and use the intended models |
@@ -135,14 +135,14 @@ See [SECURITY.md](SECURITY.md) for reporting and the threat model, and [dependen
 
 ## Validation status
 
-This revision targets **OpenCode 2.4.1 / SDK 2.4.1** and has passed:
+This revision targets **OpenCode 2.4.2 / SDK 2.4.2** and has passed:
 
 - strict TypeScript checking;
 - **18/18** unit tests;
 - package build and entry loading;
-- a host check against a local mock catalog using real OpenCode 2.4.1, reporting **zero inference requests**.
+- a host check against a local mock catalog using real OpenCode 2.4.2, reporting **zero inference requests**.
 
-This adaptation did **not** run model generation, a live Magpie session or a disconnect/reconnect drill. The historical 2.3.2 live record (real Linux gateway, 96 models, one text generation) is retained for traceability only and is not evidence for 2.4.1 inference. See [validation scope](docs/VALIDATION.md).
+This adaptation did **not** run model generation, a live Magpie session or a disconnect/reconnect drill. The historical 2.3.2 live record (real Linux gateway, 96 models, one text generation) is retained for traceability only and is not evidence for 2.4.2 inference. See [validation scope](docs/VALIDATION.md).
 
 ## Development
 
@@ -182,3 +182,7 @@ The plugin version is strictly fixed at **v0.1.0** (semver form `0.1.0` in `pack
 ## License
 
 [MIT](LICENSE). Commercial deployments must independently confirm the terms of Magpie, the upstream model services and transitive dependencies.
+
+## Uninstall and rollback
+
+Remove this plugin entry from `plugins` and restart the service or standalone process. To roll back, restore the previous package path and matching lockfile, rebuild, and restart. Keep gateway settings and credentials under your control. Starting the plugin fetches the configured gateway catalog; use `npm run test:host` for isolated localhost validation. Real catalog access requires separate authorization.

@@ -34,7 +34,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@opencode/plugin": "2.4.1"
+    "@opencode/plugin": "2.4.2"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

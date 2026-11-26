@@ -7,8 +7,8 @@
 | 项目 | 基线 |
 | --- | --- |
 | 插件 | `opencode-magpie-sync` v0.1.0（private） |
-| 宿主 | OpenCode 2.4.1 |
-| SDK | `@opencode/plugin` 2.4.1（精确锁定） |
+| 宿主 | OpenCode 2.4.2 |
+| SDK | `@opencode/plugin` 2.4.2（精确锁定） |
 | Node.js | 构建/测试 24.22.1；引擎范围见 `package.json` |
 | 形态 | 仅服务端插件；无 TUI 入口 |
 | 许可证 | MIT |
@@ -27,7 +27,7 @@
 
 | 项目 | 要求 | 验证方式 |
 | --- | --- | --- |
-| 宿主版本 | 2.4.1 | `opencode --version` |
+| 宿主版本 | 2.4.2 | `opencode --version` |
 | 网络 | 服务进程可访问网关 host:port | 在服务账号下测试 TCP/HTTP |
 | 凭据 | 可读取目录并使用目标模型的 Gateway Key | 由网关管理员确认 |
 | 包目录 | 持久绝对路径，不指向临时解压目录 | 检查 `package.json` 与 `dist/index.js` |

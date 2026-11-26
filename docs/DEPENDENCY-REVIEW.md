@@ -6,15 +6,15 @@
 
 | 项目 | 值 |
 | --- | --- |
-| 日期 | 2026-11-24 |
+| 日期 | 2026-11-26 |
 | 插件 | v0.1.0 |
-| 直接运行时依赖 | `@opencode/plugin` **2.4.1**（精确版本） |
-| 传递 SDK | `@opencode/ai`、`@opencode/schema`、`@opencode/client`、`@opencode/protocol`、`@opencode/util` 均为 2.4.1 |
+| 直接运行时依赖 | `@opencode/plugin` **2.4.2**（精确版本） |
+| 传递 SDK | `@opencode/ai`、`@opencode/schema`、`@opencode/client`、`@opencode/protocol`、`@opencode/util` 均为 2.4.2 |
 | 开发依赖 | `@types/node` 24.10.1、`typescript` 5.9.3、`vitest` 5.1.1 |
 | 完整审计 | **24 moderate / 0 high / 0 critical** |
-| 生产审计（`--omit=dev`） | **24 moderate / 0 high / 0 critical** |
+| 生产审计（`--omit=dev`） | 本轮未单独重复；历史结果为 24 moderate |
 
-原始报告：[audit.json](audit.json)。
+本轮完整审计：24 moderate、0 high、0 critical；SDK 传递依赖为 2.4.2，Effect 为 4.1.0。原始报告：[audit.json](audit.json)。生产审计尚未在本轮单独重复，旧记录仅作历史参考。
 
 ## 2. 审计命令
 
@@ -23,20 +23,20 @@ npm audit --json
 npm audit --omit=dev --json
 ```
 
-完整审计与生产审计在当前树中结果相同，因为主要依赖位于 `dependencies`。
+历史完整审计与生产审计结果相同；本轮只重复完整审计，不能将其记为生产专用审计已运行。
 
 ## 3. 告警来源
 
 当前 24 项均为 **moderate**，无 high/critical。主要链路：
 
 ```text
-@opencode/plugin@2.4.1
-├── @opencode/util@2.4.1
+@opencode/plugin@2.4.2
+├── @opencode/util@2.4.2
 │   ├── @npmcli/arborist
 │   ├── pacote → sigstore → @sigstore/tuf → tuf-js → @tufjs/models
 │   ├── glob → minimatch
 │   └── cacache / npm-registry-fetch / npm-packlist / ignore-walk
-└── @opencode/ai@2.4.1
+└── @opencode/ai@2.4.2
     └── google-auth-library → gcp-metadata → gaxios → rimraf → glob → minimatch
 ```
 

@@ -11,7 +11,7 @@
 | Node.js | `^22.12.0 || ^24.0.0 || >=26` | 推荐 24.22.1（实测） |
 | TypeScript | 5.9.3 | `strict: true`，`noEmit` 检查 |
 | Vitest | 5.1.1 | 单元测试 |
-| `@opencode/plugin` | 2.4.1 | 类型与构建依赖，精确锁定 |
+| `@opencode/plugin` | 2.4.2 | 类型与构建依赖，精确锁定 |
 
 安装：
 
@@ -92,6 +92,8 @@ docs/                      运维与开发文档
 - 默认模式若出现任何推理请求会失败；
 - 30 秒超时，Windows 下结束子进程树；
 - 输出追加到 `.host/smoke/result.txt`。
+
+测试会清除继承的 `OPENCODE_*`、`MAGPIE_*` 和 `XDG_*` 覆盖项，并重新设置独立 config/data/cache/state 目录及测试密钥。`OPENCODE_TEST_PACKAGE` 可指定安装后的包目录，`OPENCODE_TEST_ROOT` 可指定独立证据目录。
 
 指定宿主可执行文件：
 
@@ -198,4 +200,4 @@ git status --short
 - 没有提交 `node_modules/`、`dist/`、`.host/`、`.tgz`、日志或密钥；
 - 文档中的版本、命令、测试数量与代码一致；
 - 新增行为有测试覆盖；
-- 未把历史 2.3.2 证据写成 2.4.1 结论。
+- 未把历史 2.3.2/2.4.1 证据写成 2.4.2 结论。
